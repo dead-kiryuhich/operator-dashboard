@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAVBOT - Operator Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0f1f;
+            --bg-secondary: #111827;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-color: #334155;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #0f1525 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-title { font-size: 32px; font-weight: 700; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        
+        .user-info {
+            background: var(--bg-secondary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #3b82f6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--bg-primary);
+        }
+        
+        .balance-display {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            padding: 10px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+        
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+        
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .card h2 { margin-bottom: 20px; }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); }
+        
+        input, select {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #3b82f6 100%);
+            color: var(--bg-primary);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(6, 182, 212, 0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th {
+            background: var(--bg-primary);
+            padding: 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        tr:hover { background: rgba(6, 182, 212, 0.05); }
+        
+        .login-page {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1f3a 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-card {
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 16px;
+            padding: 40px;
+            width: 400px;
+        }
+        
+        .login-title { font-size: 28px; font-weight: 700; margin-bottom: 30px; text-align: center; }
+        .login-form { display: flex; flex-direction: column; gap: 16px; }
+        .login-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 13px; display: none; }
+        .login-error.show { display: block; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-page">
+        <div class="login-card">
+            <div class="login-title">🏆 FAVBOT</div>
+            <div id="loginError" class="login-error"></div>
+            
+            <div id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label>Логін</label>
+                    <input type="text" id="loginUsername" placeholder="admin">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="123456">
+                </div>
+                <button class="btn btn-primary" onclick="handleLogin()" style="width: 100%;">Увійти</button>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center; font-size: 12px; color: var(--text-tertiary);">
+                <p><strong>Демо:</strong> admin / 123456</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboardPage" class="hidden">
+        <div class="container">
+            <header>
+                <div class="header-title">🏆 FAVBOT</div>
+                <div class="header-right">
+                    <div class="balance-display">
+                        💎 <span id="headerBalance">50</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarHeader">A</div>
+                        <div id="userNameHeader">Admin</div>
+                    </div>
+                    <button class="logout-btn" onclick="handleLogout()">Вихід</button>
+                </div>
+            </header>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showPage('admin')">👑 Адмін</button>
+                <button class="nav-tab" onclick="showPage('roulette')">🎰 Рулетка</button>
+            </div>
+
+            <!-- ADMIN PAGE -->
+            <div id="adminPage" class="page active">
+                <div class="card">
+                    <h2>👤 Створити користувача</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Прізвище</label>
+                            <input type="text" id="inputLastName">
+                        </div>
+                        <div class="form-group">
+                            <label>Ім'я</label>
+                            <input type="text" id="inputFirstName">
+                        </div>
+                        <div class="form-group">
+                            <label>По батькові</label>
+                            <input type="text" id="inputPatronymic">
+                        </div>
+                        <div class="form-group">
+                            <label>Команда</label>
+                            <input type="text" id="inputTeam">
+                        </div>
+                        <div class="form-group">
+                            <label>Логін</label>
+                            <input type="text" id="inputUsername">
+                        </div>
+                        <div class="form-group">
+                            <label>Пароль</label>
+                            <input type="password" id="inputPassword">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addUser()">Створити</button>
+                </div>
+
+                <div class="card">
+                    <h2>👥 Користувачі</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>ПІБ</th>
+                                <th>Логін</th>
+                                <th>Баланс</th>
+                                <th>Дія</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ROULETTE PAGE -->
+            <div id="roulettePage" class="page">
+                <div class="card">
+                    <h2>🎰 Рулетка</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center;">
+                        <div style="text-align: center;">
+                            <div style="width: 250px; height: 250px; border-radius: 50%; background: conic-gradient(#ef4444 0deg 36deg, #1f2937 36deg 72deg, #ef4444 72deg 108deg, #1f2937 108deg 144deg, #ef4444 144deg 180deg, #1f2937 180deg 216deg, #ef4444 216deg 252deg, #1f2937 252deg 288deg, #ef4444 288deg 324deg, #1f2937 324deg 360deg); border: 8px solid var(--accent-cyan); margin: 0 auto;" id="rouletteWheel"></div>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="background: var(--bg-primary); padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 12px; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 8px;">Баланс</div>
+                                <div style="font-size: 36px; font-weight: 700; color: var(--accent-green);" id="rouletteBalance">50</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Ставка</label>
+                                <input type="number" id="betAmount" value="10" min="1">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>На що ставиш?</label>
+                                <select id="betType">
+                                    <option value="red">🔴 Червоне (x2)</option>
+                                    <option value="black">⚫ Чорне (x2)</option>
+                                    <option value="number">🎯 На число (x36)</option>
+                                </select>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="spinRoulette()" style="width: 100%; padding: 16px;">КРУТИТИ! 🎰</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentUser = null;
+
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    errorEl.textContent = data.message;
+                    errorEl.classList.add('show');
+                    return;
+                }
+
+                currentUser = data.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showDashboard();
+            } catch (err) {
+                errorEl.textContent = 'Помилка при вході';
+                errorEl.classList.add('show');
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            
+            const firstName = currentUser.name.split(' ')[0];
+            document.getElementById('userAvatarHeader').textContent = firstName.charAt(0).toUpperCase();
+            document.getElementById('userNameHeader').textContent = currentUser.name;
+            document.getElementById('headerBalance').textContent = currentUser.balance;
+            document.getElementById('rouletteBalance').textContent = currentUser.balance;
+            
+            renderUsers();
+        }
+
+        function handleLogout() {
+            if (confirm('Вийти?')) {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                document.getElementById('loginPage').classList.remove('hidden');
+                document.getElementById('dashboardPage').classList.add('hidden');
+            }
+        }
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page + 'Page').classList.add('active');
+            
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        async function addUser() {
+            const firstName = document.getElementById('inputFirstName').value.trim();
+            const lastName = document.getElementById('inputLastName').value.trim();
+            const patronymic = document.getElementById('inputPatronymic').value.trim();
+            const team = document.getElementById('inputTeam').value;
+            const username = document.getElementById('inputUsername').value.trim();
+            const password = document.getElementById('inputPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, patronymic, team, username, password, role: 'user' })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Користувача створено!');
+                    document.getElementById('inputFirstName').value = '';
+                    document.getElementById('inputLastName').value = '';
+                    document.getElementById('inputPatronymic').value = '';
+                    document.getElementById('inputTeam').value = '';
+                    document.getElementById('inputUsername').value = '';
+                    document.getElementById('inputPassword').value = '';
+                    renderUsers();
+                }
+            } catch (err) {
+                alert('❌ Помилка при створенні користувача');
+            }
+        }
+
+        async function renderUsers() {
+            try {
+                const response = await fetch(`${API_URL}/users`);
+                const users = await response.json();
+                
+                const tbody = document.getElementById('usersTable');
+                tbody.innerHTML = users.map((user, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${user.name}</td>
+                        <td>${user.username}</td>
+                        <td>${user.balance}</td>
+                        <td><button class="btn" style="background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color); padding: 6px 12px; font-size: 11px;" onclick="deleteUser(${user.id})">Видалити</button></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Error rendering users:', err);
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Видалити користувача?')) return;
+            
+            try {
+                await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+                renderUsers();
+            } catch (err) {
+                alert('❌ Помилка при видаленні');
+            }
+        }
+
+        async function spinRoulette() {
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            const betType = document.getElementById('betType').value;
+
+            if (!betAmount || betAmount > currentUser.balance) {
+                alert('❌ Невірна ставка');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/roulette/spin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        betAmount,
+                        betType,
+                        betNumber: null
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentUser.balance = data.newBalance;
+                    document.getElementById('headerBalance').textContent = currentUser.balance;
+                    document.getElementById('rouletteBalance').textContent = currentUser.balance;
+                    
+                    alert(data.won ? `🎉 ВИГРАВ! +${data.winnings}` : `😢 ПРОГРАВ -${Math.abs(data.winnings)}`);
+                }
+            } catch (err) {
+                alert('❌ Помилка при крученні рулетки');
+            }
+        }
+
+        // Check if user already logged in
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                showDashboard();
+            }
+        });
+    </script>
+</body>
+</html>
